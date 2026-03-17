@@ -11,6 +11,19 @@ This app does not call the Capsule API itself. It is just a minimal
 egress-proxy example, so there is no `IN_ENCLAVE` mode switch in the app code or
 Dockerfile.
 
+Revalidated on March 17, 2026 on `app-node` using the published `capsule-cli`
+release and the published ECR images:
+- host: Amazon Linux 2023 x86_64
+- `capsule-cli 1.7.2 (git 9311be9fc75555180a01b820e8373f062ebe8161)`
+- `public.ecr.aws/d4t4u8d2/sparsity-ai/capsule-runtime:latest`
+  pulled with digest `sha256:2ab406cf9e934eb2dd31a5695c86772c8af3e3863f63bf9e783657e628ea018f`
+- `public.ecr.aws/d4t4u8d2/sparsity-ai/capsule-shell:latest`
+  pulled with digest `sha256:3a0920e67c7ee080064e484562a63b0315e81171084dfe7fab32aa17fda2a86e`
+- `docker images hn-fetcher:latest` reported image ID `dd48d2308560` at `177MB`
+- direct `GET /health` returned `{"ok":true,"upstream":"https://news.ycombinator.com"}`
+- `capsule-cli build` completed successfully against the published Capsule Runtime,
+  Capsule Shell, and Nitro CLI images
+
 Validated on March 14, 2026 on `app-node`:
 - host: Amazon Linux 2023 x86_64
 - `capsule-cli 1.7.2`
@@ -91,6 +104,17 @@ The manifest includes:
 - `egress` - Allows outbound requests to news.ycombinator.com
 - `api` - Enables the capsule API service on port 9000 (provides attestation, signing, encryption, and randomness)
 - `aux_api` - Enables the auxiliary API on port 9001 (provides controlled external access to select API endpoints)
+
+For the March 17, 2026 release-based validation on `app-node`, the test flow
+used a temporary manifest copy with these two lines uncommented so the example
+would explicitly consume the published images from public ECR:
+
+```yaml
+sources:
+  app: "hn-fetcher:latest"
+  capsule-runtime: "public.ecr.aws/d4t4u8d2/sparsity-ai/capsule-runtime:latest"
+  capsule-shell: "public.ecr.aws/d4t4u8d2/sparsity-ai/capsule-shell:latest"
+```
 
 Then build capsule-cli image with command:
 
