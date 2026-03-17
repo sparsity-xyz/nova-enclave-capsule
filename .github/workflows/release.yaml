@@ -122,10 +122,10 @@ jobs:
           chmod 755 amd64/capsule-runtime amd64/capsule-shell
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
 
       - name: Configure AWS credentials from OIDC
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-east-1
           role-to-assume: ${{ env.AWS_PUBLISH_ROLE_ARN }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Build Capsule Runtime Image
         id: capsule-runtime-build-image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: "{{defaultContext}}:dockerfiles"
           build-contexts: artifacts=.
@@ -180,7 +180,7 @@ jobs:
 
       - name: Build Capsule Shell Image
         id: capsule-shell-build-image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: "{{defaultContext}}:dockerfiles"
           build-contexts: artifacts=.
