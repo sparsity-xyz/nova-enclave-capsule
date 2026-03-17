@@ -31,7 +31,7 @@ For architecture details, see [Runtime Architecture](docs/architecture.md) and [
 Run this command to install the latest version of the `capsule-cli` CLI tool:
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/sparsity-xyz/nova-enclave-capsule/refs/heads/sparsity/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/sparsity-xyz/nova-enclave-capsule/refs/heads/main/install.sh)"
 ```
 
 Current automated release artifacts and the installer script target Linux `x86_64` only.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nova Enclave Capsule installer script
-# Usage: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/sparsity-xyz/nova-enclave-capsule/refs/heads/sparsity/install.sh)"
+# Usage: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/sparsity-xyz/nova-enclave-capsule/refs/heads/main/install.sh)"
 
 set -e
 
