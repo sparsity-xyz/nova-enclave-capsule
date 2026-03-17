@@ -25,6 +25,6 @@ COPY --from=nitro_cli /usr/bin/nitro-cli /bin/nitro-cli
 COPY --from=nitro_cli /tmp/dummy /var/log/nitro_enclaves/
 COPY --from=nitro_cli /tmp/dummy /run/nitro_enclaves/
 
-COPY ./capsule-shell /usr/local/bin/capsule-shell
+COPY --from=artifacts ${TARGETARCH}/capsule-shell /usr/local/bin/capsule-shell
 
 ENTRYPOINT ["/usr/local/bin/capsule-shell"]
