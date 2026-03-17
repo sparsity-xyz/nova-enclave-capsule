@@ -5,6 +5,7 @@ set -euo pipefail
 IMAGE_REF="${1:-}"
 SMOKE_TAG="nitro-cli-smoke-app:${RANDOM}-$$"
 SCRIPT_TMPDIR="$(mktemp -d)"
+SMOKE_BASE_IMAGE="${SMOKE_BASE_IMAGE:-alpine:3.20}"
 
 cleanup() {
     docker image rm -f "${SMOKE_TAG}" >/dev/null 2>&1 || true
@@ -18,8 +19,8 @@ if [[ -z "${IMAGE_REF}" ]]; then
     exit 1
 fi
 
-cat > "${SCRIPT_TMPDIR}/Dockerfile" <<'EOF'
-FROM public.ecr.aws/docker/library/alpine:3.20
+cat > "${SCRIPT_TMPDIR}/Dockerfile" <<EOF
+FROM ${SMOKE_BASE_IMAGE}
 CMD ["echo", "nitro-cli smoke test"]
 EOF
 
