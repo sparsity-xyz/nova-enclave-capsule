@@ -1,1 +1,227 @@
-pages for nova enclave capsule
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nova Enclave Capsule - Developer Documentation">
+    <title>Nova Enclave Capsule | Developer Docs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo-stack">
+                <div class="logo-box"></div>
+                <div class="logo-box blur"></div>
+            </div>
+            <h1>Capsule Docs</h1>
+        </div>
+        <nav id="nav">
+            <a href="#welcome" class="nav-link active">Welcome & Overview</a>
+            <a href="#the-shift" class="nav-link">The Product Shift</a>
+            <a href="#architecture" class="nav-link">Architecture & Modules</a>
+            <a href="#core-features" class="nav-link">Core Features</a>
+            <a href="#api-suite" class="nav-link">Capsule API Suite</a>
+            <a href="#use-cases" class="nav-link">Business Use Cases</a>
+            <a href="#developer-guide" class="nav-link">Developer Guide</a>
+            <a href="#contact" class="nav-link">Community & Contact</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <!-- Section: Welcome -->
+        <section id="welcome" class="section hero">
+            <div class="badge">Developer Documentation</div>
+            <h1 class="gradient-text">Nova Enclave Capsule</h1>
+            <p class="lead">Build, package, and deploy trusted Nitro Enclave applications without the raw infrastructure headache.</p>
+            <p>Nova Enclave Capsule is an open-source toolkit that abstracts the complexity of AWS Nitro Enclaves. It provides a high-level runtime surface for attestation, secure networking, and key management—letting you focus on shipping value instead of operations.</p>
+            <div class="quick-links">
+                <a href="#developer-guide" class="btn btn-primary">Get Started</a>
+                <a href="https://github.com/sparsity-xyz/nova-enclave-capsule" target="_blank" class="btn btn-secondary">View on GitHub</a>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- Section: The Product Shift (Sales Deck Integration) -->
+        <section id="the-shift" class="section">
+            <div class="section-header">
+                <h2>From TEE Integration to <span class="text-accent">Product Workflow</span></h2>
+                <p>Traditional enclave projects often stall at the "integration" phase. Capsule turns Nitro Enclaves into a predictable product workflow.</p>
+            </div>
+            <div class="comparison-grid">
+                <div class="comp-card">
+                    <h4>The Integration Project (Old Way)</h4>
+                    <ul>
+                        <li>Handling raw vsock & CID complexity</li>
+                        <li>Building custom proxy layers</li>
+                        <li>Integrating hardware-specific SDKs</li>
+                        <li>Fragile time-sync & log plumbing</li>
+                    </ul>
+                </div>
+                <div class="comp-card highlight">
+                    <h4>The Capsule Workflow (New Way)</h4>
+                    <ul>
+                        <li><span class="check">✓</span> Standard Docker-based builds</li>
+                        <li><span class="check">✓</span> Zero-config Ingress/Egress proxies</li>
+                        <li><span class="check">✓</span> High-level RESTful Capsule APIs</li>
+                        <li><span class="check">✓</span> Stable, supervised runtime environment</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Architecture -->
+        <section id="architecture" class="section">
+            <h2>Architecture & Modules</h2>
+            <p>Capsule is built as a layered system to ensure security, isolation, and developer productivity.</p>
+            
+            <div class="architecture-grid">
+                <div class="module-card">
+                    <div class="module-label">Host Side</div>
+                    <h3>Capsule CLI & Shell</h3>
+                    <p>The CLI builds your Docker app into an EIF (Enclave Image Format). The Shell acts as the entrypoint in your host container, wrapping <code>nitro-cli</code> to launch the enclave securely.</p>
+                </div>
+                <div class="module-card">
+                    <div class="module-label">Enclave Side</div>
+                    <h3>Capsule Runtime</h3>
+                    <p>The core supervisor running inside the enclave. It manages the app lifecycle, handles networking (ingress/egress), synchronizes the clock, and exposes the Capsule API.</p>
+                </div>
+            </div>
+            
+            <div class="code-box-wrapper">
+                <div class="code-box-header">Standard Capsule Manifest (capsule.yaml)</div>
+<pre><code>version: "v1"
+run:
+  ingress:
+    - port: 8080
+      target: 8080 # App port inside enclave
+  egress:
+    allow: ["api.openai.com", "eth-mainnet.alchemy.com"]
+  mounts:
+    - path: "/data"
+      source: "hostfs"
+</code></pre>
+            </div>
+        </section>
+
+        <!-- Section: Core Features -->
+        <section id="core-features" class="section">
+            <h2>Core Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card glass">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Ingress & Egress Control</h3>
+                    <p>Securely route traffic into your app and whitelist outbound HTTP/HTTPS destinations. No raw proxy setup required.</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="feature-icon">📁</div>
+                    <h3>Host-backed Mounts</h3>
+                    <p>Expose host directories inside the enclave as normal filesystem paths using our transparent hostfs proxy.</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="feature-icon">⏰</div>
+                    <h3>Clock Sync</h3>
+                    <p>Keeps the enclave wall clock accurately aligned with the host—critical for TLS and time-sensitive signing.</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="feature-icon">📜</div>
+                    <h3>Runtime Supervision</h3>
+                    <p>Streams app logs to the host console and monitors exit status for robust production reliability.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: API Suite -->
+        <section id="api-suite" class="section">
+            <div class="section-header">
+                <h2>The Capsule <span class="text-accent">API Suite</span></h2>
+                <p>We provide a unified API surface at <code>localhost</code> so your app never has to touch low-level Nitro SDKs.</p>
+            </div>
+            <div class="api-list">
+                <div class="api-item">
+                    <h4>Attestation & Randomness</h4>
+                    <p>Fetch signed attestation documents (Enclave Identity) and high-entropy random seeds via simple HTTP calls.</p>
+                </div>
+                <div class="api-item">
+                    <h4>KMS & Wallet Integration</h4>
+                    <p>Securely derive keys and sign transactions using Nova KMS-backed identities. Supports Ethereum (secp256k1) and P-384 ECDH encryption.</p>
+                </div>
+                <div class="api-item">
+                    <h4>S3-Backed Storage</h4>
+                    <p>Encrypted object storage flows that link your enclave identity directly to cloud storage buckets.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Use Cases -->
+        <section id="use-cases" class="section highlight-bg">
+            <div class="badge inverse">Business Use Cases</div>
+            <h2>What can you ship?</h2>
+            <div class="use-case-grid">
+                <div class="use-case">
+                    <h3>Private AI Backends</h3>
+                    <p>Protect prompts, user context, and model parameters inside a verifiable boundary.</p>
+                </div>
+                <div class="use-case">
+                    <h3>Risk & Policy Engines</h3>
+                    <p>Run scoring and fraud detection logic that is verifiable and tamper-proof.</p>
+                </div>
+                <div class="use-case">
+                    <h3>Signing Orchestration</h3>
+                    <p>Keep sensitive signing flows closer to the edge with hardware-backed security.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Developer Guide -->
+        <section id="developer-guide" class="section">
+            <h2>Developer Guide</h2>
+            <p>Start from a template, develop locally with a mock service, and deploy to Nitro when ready.</p>
+            
+            <div class="steps-v2">
+                <div class="step-card">
+                    <span class="step-tag">01</span>
+                    <h3>Bootstrap</h3>
+                    <p>Use <a href="https://github.com/sparsity-xyz/nova-app-template" target="_blank">nova-app-template</a> to get a ready-to-go Express server and Capsule configuration.</p>
+                </div>
+                <div class="step-card">
+                    <span class="step-tag">02</span>
+                    <h3>Explore Examples</h3>
+                    <p>Check <a href="https://github.com/sparsity-xyz/nova-app-examples" target="_blank">nova-app-examples</a> for real-world patterns like secure fetchers and wallet integrations.</p>
+                </div>
+                <div class="step-card">
+                    <span class="step-tag">03</span>
+                    <h3>Build & Launch</h3>
+                    <p>Run <code>capsule-cli build</code> to generate your EIF and launch it on your local Nitro-enabled EC2 instance.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>Nova Enclave Capsule</h3>
+                    <p>Empowering teams to ship trusted products.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="mailto:support@sparsity.xyz">Email</a>
+                    <a href="https://discord.gg/mKTdaQyC3P" target="_blank">Discord</a>
+                    <a href="https://x.com/sparsity_xyz" target="_blank">X.com</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Sparsity Ecosystem Office. All rights reserved.
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
