@@ -66,31 +66,32 @@ The ASCII view below keeps the original file/layout-oriented perspective: what t
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ Docker Image (release) - runs as a single container                          │
 │                                                                              │
-│  entrypoint: /usr/local/bin/capsule-shell                                     │
+│  entrypoint: /usr/local/bin/capsule-shell                                    │
 │  includes:                                                                   │
 │    - /bin/nitro-cli                                                          │
-│    - /enclave/capsule.yaml   (host-side runtime manifest copy)              │
+│    - /enclave/capsule.yaml (host-side runtime manifest copy)                 │
 │    - /enclave/application.eif                                                │
 │                                                                              │
 │  Runtime bind mounts (when `--mount` is used):                               │
-│    - /mnt/capsule-hostfs-data/<name>  (host-backed loopback mount)          │
+│    - /mnt/capsule-hostfs-data/<name> (host-backed loopback mount)            │
 │                                                                              │
 │  Image layers (top -> bottom):                                               │
 │    [L3] /enclave/application.eif                                             │
-│    [L2] /enclave/capsule.yaml                                               │
-│    [L1] Capsule Shell image (contains capsule-shell, nitro-cli)                      │
+│    [L2] /enclave/capsule.yaml                                                │
+│    [L1] Capsule Shell image                                                  │
+│         (contains capsule-shell, nitro-cli)                                  │
 │                                                                              │
 │  Runtime control flow:                                                       │
-│    capsule-shell --> nitro-cli run-enclave --eif /enclave/application.eif     │
-│                  \-> reads /enclave/capsule.yaml for host-side runtime      │
+│    capsule-shell --> reads /enclave/capsule.yaml for host-side runtime       │
+│                  --> nitro-cli run-enclave --eif /enclave/application.eif    │
 └──────────────────────────────────────────────────────────────────────────────┘
-
                      | launches enclave with EIF
                      v
 ┌─────────────────────────── Enclave (application.eif) ────────────────────────┐
-│ /etc/capsule/capsule.yaml (matching manifest copy embedded for capsule-runtime)       │
+│ /etc/capsule/capsule.yaml                                                    │
+│   (matching manifest copy embedded for capsule-runtime)                      │
 │                                                                              │
-│ /sbin/capsule-runtime (supervisor)                                                      │
+│ /sbin/capsule-runtime (supervisor)                                           │
 │   Runtime services                                                           │
 │   - launcher:   start and monitor the application                            │
 │   - ingress:    inbound traffic --> app                                      │
@@ -100,13 +101,14 @@ The ASCII view below keeps the original file/layout-oriented perspective: what t
 │   - helios:     trustless Ethereum / OP Stack light client RPC               │
 │   - console:    collect app stdout/stderr --> container logs                 │
 │                                                                              │
-│   Capsule API (`/v1/*`)                                                     │
+│   Capsule API (`/v1/*`)                                                      │
 │   - core:       attestation, signing, random                                 │
 │   - encryption: `/v1/encryption/*` (P-384 ECDH)                              │
 │   - storage:    `/v1/s3/*` persistent storage integration                    │
 │   - kms:        `/v1/kms/*` + `/v1/app-wallet/*` backed by Nova KMS          │
 │                                                                              │
-│ [User Application] (started and supervised by capsule-runtime; sees `/mnt/...`)         │
+│ [User Application]                                                           │
+│   (started and supervised by capsule-runtime; sees `/mnt/...`)               │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
