@@ -13,6 +13,9 @@ What exists here is:
 Some applications choose to talk to a separately hosted development endpoint
 when they are not running inside an enclave.
 
+At the time of writing, `nova-platform` provides one such mock endpoint at
+`http://capsule-runtime.sparsity.cloud:18000/`.
+
 That endpoint is not part of this repository and is not versioned together with
 Nova Enclave Capsule. Treat any such URL as an external development convenience, not as a
 guaranteed mirror of the current `capsule-api` implementation.
@@ -33,6 +36,7 @@ Notes:
 
 - `IN_ENCLAVE` is not set automatically by Nova Enclave Capsule
 - `CAPSULE_API_MOCK_URL` is an application choice, not a Nova Enclave Capsule-managed endpoint
+- `http://capsule-runtime.sparsity.cloud:18000/` is a `nova-platform` hosted mock, not a repository-managed service
 - choose and manage that convention in your own application image or deployment environment
 - if your manifest uses a different `api.listen_port`, update the enclave-local URL accordingly
 
