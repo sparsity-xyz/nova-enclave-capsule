@@ -47,6 +47,10 @@ struct CliArgs {
     #[clap(long = "work-dir")]
     work_dir: Option<PathBuf>,
 
+    /// Docker image USER for the application child.
+    #[clap(long)]
+    app_user: Option<String>,
+
     #[clap(required = true)]
     entrypoint: Vec<OsString>,
 
@@ -214,6 +218,7 @@ fn log_launch_plan(
 }
 
 async fn launch(args: &CliArgs, config: Arc<Configuration>) -> Result<launcher::ExitStatus> {
+    let creds = launcher::Credentials::from_image_user(args.app_user.as_deref())?;
     let nsm = Arc::new(Nsm::new());
 
     if !args.no_bootstrap {
@@ -265,8 +270,10 @@ async fn launch(args: &CliArgs, config: Arc<Configuration>) -> Result<launcher::
         // Start ingress last, once all local services are bound and ready.
         services.ingress = Some(IngressService::start(&config)?);
 
-        let creds = launcher::Credentials { uid: 0, gid: 0 };
-        info!("Starting {:?}", args.entrypoint);
+        info!(
+            "Starting {:?} as {}:{}",
+            args.entrypoint, creds.uid, creds.gid
+        );
         let exit_status =
             launcher::start_child(args.entrypoint.clone(), creds, args.work_dir.clone()).await??;
         info!("Entrypoint {}", exit_status);

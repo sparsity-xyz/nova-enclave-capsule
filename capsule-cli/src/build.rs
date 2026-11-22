@@ -27,6 +27,25 @@ const CAPSULE_RUNTIME_IMAGE: &str = "public.ecr.aws/d4t4u8d2/sparsity-ai/capsule
 const CAPSULE_RUNTIME_IMAGE_BINARY_PATH: &str = "/usr/local/bin/capsule-runtime";
 const CAPSULE_SHELL_IMAGE: &str = "public.ecr.aws/d4t4u8d2/sparsity-ai/capsule-shell:latest";
 
+/// Preserve the app identity and argv when replacing its entrypoint with Capsule bootstrap.
+fn runtime_entrypoint(config: ImageConfig) -> Vec<String> {
+    let mut argv = vec![
+        ENCLAVE_CAPSULE_RUNTIME_PATH.to_owned(),
+        "--config-dir".to_owned(),
+        ENCLAVE_CONFIG_DIR.to_owned(),
+    ];
+    if let Some(dir) = config.working_dir {
+        argv.extend(["--work-dir".to_owned(), dir]);
+    }
+    if let Some(user) = config.user.filter(|value| !value.is_empty()) {
+        argv.push(format!("--app-user={user}"));
+    }
+    argv.push("--".to_owned());
+    argv.extend(config.entrypoint.unwrap_or_default());
+    argv.extend(config.cmd.unwrap_or_default());
+    argv
+}
+
 pub struct EnclaveArtifactBuilder {
     docker: Arc<Docker>,
     image_manager: ImageManager,
@@ -142,52 +161,7 @@ impl EnclaveArtifactBuilder {
             .await?
             .config;
 
-        // Find the CMD and ENTRYPOINT from the source image. If either was specified in "shell form"
-        // Docker seems to convert it to "exec form" as an actual shell invocation, so we can simply
-        // ignore that possibility.
-        //
-        // Since the enclave image cannot take any arguments (which would normally override a CMD),
-        // we can simply take everything from CMD and append it to the ENTRYPOINT, then append that
-        // whole thing to the capsule-runtime invocation.
-        // TODO(russell_h): Figure out what happens when a source image specifies env variables.
-        let mut cmd = match img_config {
-            Some(ImageConfig {
-                cmd: Some(ref cmd), ..
-            }) => cmd.clone(),
-            _ => vec![],
-        };
-
-        let mut entrypoint = match img_config {
-            Some(ImageConfig {
-                entrypoint: Some(ref entrypoint),
-                ..
-            }) => entrypoint.clone(),
-            _ => vec![],
-        };
-
-        let working_dir = match img_config {
-            Some(ImageConfig {
-                working_dir: Some(ref working_dir),
-                ..
-            }) => Some(working_dir.clone()),
-            _ => None,
-        };
-
-        let mut capsule_runtime_command = vec![
-            String::from(ENCLAVE_CAPSULE_RUNTIME_PATH),
-            String::from("--config-dir"),
-            String::from("/etc/capsule"),
-        ];
-
-        if let Some(wd) = working_dir {
-            capsule_runtime_command.push(String::from("--work-dir"));
-            capsule_runtime_command.push(wd);
-        }
-
-        capsule_runtime_command.push(String::from("--"));
-
-        capsule_runtime_command.append(&mut entrypoint);
-        capsule_runtime_command.append(&mut cmd);
+        let capsule_runtime_command = runtime_entrypoint(img_config.unwrap_or_default());
 
         debug!("appending layer to source image");
         let amended_image = self
@@ -210,7 +184,7 @@ impl EnclaveArtifactBuilder {
                         },
                         chown: ENCLAVE_OVERLAY_CHOWN.to_string(),
                     })
-                    .set_entrypoint(capsule_runtime_command),
+                    .set_root_entrypoint(capsule_runtime_command),
             )
             .await?;
 
@@ -508,6 +482,29 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
     use tempfile::TempDir;
+
+    #[test]
+    fn image_user_is_a_runtime_option_and_app_arguments_stay_after_separator() {
+        let config = bollard::models::ImageConfig {
+            user: Some("worker:operators".to_owned()),
+            working_dir: Some("/app".to_owned()),
+            entrypoint: Some(vec!["server".to_owned()]),
+            cmd: Some(vec!["--app-user=0".to_owned()]),
+            ..Default::default()
+        };
+        assert_eq!(
+            &super::runtime_entrypoint(config)[3..],
+            [
+                "--work-dir",
+                "/app",
+                "--app-user=worker:operators",
+                "--",
+                "server",
+                "--app-user=0"
+            ]
+        );
+        assert_eq!(&super::runtime_entrypoint(Default::default())[3..], ["--"]);
+    }
 
     fn nitro_cli_image_repo() -> String {
         NITRO_CLI_IMAGE
