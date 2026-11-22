@@ -136,7 +136,9 @@ Main helpers:
 
 ### `launcher.rs`
 
-- launches the user entrypoint with UID/GID 0
+- Capsule bootstraps as root and launches the application under the Docker image’s `USER` (name or numeric UID, optionally followed by a group). With no `USER`, the legacy default is `0:0`.
+- Account names and default groups are resolved inside the enclave. An explicit group replaces supplementary groups. A numeric UID without an account or an explicit group uses GID 0, so use e.g. `USER 1000:1000` for a minimal image. An unresolvable name stops startup.
+- Non-root children run with Linux `no_new_privs`. Package application files as readable by that user and give it write access only to its data directory. When adopting this change, use matching Capsule CLI and runtime versions and rebuild the EIF.
 - reaps children through blocking `waitpid` logic wrapped in `spawn_blocking`
 
 ### `capsule_api.rs`

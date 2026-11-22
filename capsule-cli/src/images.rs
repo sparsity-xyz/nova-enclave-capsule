@@ -262,6 +262,7 @@ pub struct LayerBuilder {
     files: Vec<FileBuilder>,
 
     entrypoint: Option<Vec<String>>,
+    root_bootstrap: bool,
 }
 
 impl LayerBuilder {
@@ -269,6 +270,7 @@ impl LayerBuilder {
         Self {
             files: vec![],
             entrypoint: None,
+            root_bootstrap: false,
         }
     }
 
@@ -282,6 +284,12 @@ impl LayerBuilder {
     pub fn set_entrypoint(&mut self, entrypoint: Vec<String>) -> &mut Self {
         self.entrypoint = Some(entrypoint);
         self
+    }
+
+    /// Bootstrap needs root even when the application image declares USER.
+    pub(crate) fn set_root_entrypoint(&mut self, entrypoint: Vec<String>) -> &mut Self {
+        self.root_bootstrap = true;
+        self.set_entrypoint(entrypoint)
     }
 
     /// Realize the LayerBuilder to a tarred up Docker context containing a Dockerfile
@@ -329,6 +337,10 @@ impl LayerBuilder {
             }
 
             dw.write_all(file.realize()?.as_bytes()).await?;
+        }
+
+        if self.root_bootstrap {
+            dw.write_all(b"USER 0:0\n").await?;
         }
 
         // Write out the ENTRYPOINT, if set
