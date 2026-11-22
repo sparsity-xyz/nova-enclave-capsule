@@ -62,9 +62,11 @@ impl Credentials {
         let (gid, groups) = if explicit_group {
             let gid = match numeric_id(group)? {
                 Some(id) => Gid::from_raw(id),
-                None => Group::from_name(group)?
-                    .with_context(|| format!("unknown image group {group:?}"))?
-                    .gid,
+                None => {
+                    Group::from_name(group)?
+                        .with_context(|| format!("unknown image group {group:?}"))?
+                        .gid
+                }
             };
             (gid, vec![])
         } else if let Some(account) = account {
@@ -92,8 +94,13 @@ impl Credentials {
                 if !self.uid.is_root() {
                     let on: nix::libc::c_ulong = 1;
                     let unused: nix::libc::c_ulong = 0;
-                    let rc =
-                        nix::libc::prctl(nix::libc::PR_SET_NO_NEW_PRIVS, on, unused, unused, unused);
+                    let rc = nix::libc::prctl(
+                        nix::libc::PR_SET_NO_NEW_PRIVS,
+                        on,
+                        unused,
+                        unused,
+                        unused,
+                    );
                     if rc == -1 {
                         return Err(io::Error::last_os_error());
                     }
